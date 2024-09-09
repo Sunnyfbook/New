@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Add Video Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f5f6fa;
+            color: #34495e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2980b9;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="url"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1d6fa5;
+        }
+
+        .output {
+            margin-top: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Video Details</h1>
+        <form id="video-form">
+            <label for="title">Title</label>
+            <input type="text" id="title" required>
+
+            <label for="thumbnail">Thumbnail URL</label>
+            <input type="url" id="thumbnail" required>
+
+            <label for="m3u8">m3u8 URL</label>
+            <input type="url" id="m3u8" required>
+
+            <button type="submit">Add Video</button>
+        </form>
+
+        <div class="output">
+            <h2>Generated JSON</h2>
+            <textarea id="json-output" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('video-form');
+        const jsonOutput = document.getElementById('json-output');
+        let videos = [];
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('title').value;
+            const thumbnail = document.getElementById('thumbnail').value;
+            const m3u8 = document.getElementById('m3u8').value;
+
+            const newVideo = { title, thumbnail, m3u8, views: 0 };
+            videos.push(newVideo);
+
+            jsonOutput.value = JSON.stringify(videos, null, 2);
+
+            form.reset();
+        });
+    </script>
+</body>
+</html>
