@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Gallery</title>
+    <title>馃摻锔� MMS Collection 馃帴</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -41,9 +41,16 @@
             font-size: 2.5rem;
         }
 
+        .page-views {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+
         .gallery {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* Ensures two videos per row */
+            grid-template-columns: repeat(2, 1fr);
             grid-gap: 20px;
         }
 
@@ -71,7 +78,7 @@
         .thumbnail {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Ensures the image covers the area without distortion */
+            object-fit: cover;
         }
 
         .title-container {
@@ -82,6 +89,12 @@
         .title {
             font-size: 1.2rem;
             font-weight: 600;
+        }
+
+        .views {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--text-color);
         }
 
         .modal {
@@ -119,21 +132,6 @@
             background: var(--secondary-color);
         }
 
-        .close-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            float: right;
-            margin-bottom: 10px;
-        }
-
-        .close-button:hover {
-            background: #3498db;
-        }
-
         video {
             width: 100%;
             border-radius: 5px;
@@ -143,88 +141,90 @@
 <body>
     <div class="container">
         <h1>Video Gallery</h1>
-        <div class="gallery" id="videoGallery">
+        <div class="page-views" id="page-views">Page Views: 0</div>
+        <div class="gallery">
             <!-- Gallery items will be dynamically inserted here -->
         </div>
     </div>
 
     <div class="modal" id="video-modal">
-        <div class="modal-content">
-            <button class="close-button" id="close-button">Close</button>
-            <video controls></video>
-        </div>
+        <video controls></video>
     </div>
 
     <div class="modal" id="prompt-modal">
         <div class="modal-content">
-            <img src="" alt="Profile Image" id="random-image" class="random-image"> <!-- Placeholder for the random image -->
-            <h2>Join Our Telegram Channel!</h2>
-            <p>For more exciting content, click the button below to join now!</p>
-            <button class="join-button" onclick="window.location='https://t.me/your-telegram-channel';">Join Now</button>
+            <h2>Watch Full Video OnTelegram Channel!</h2>
+            <p>Daily Updated MMS,Viral MMS, Trending MMS, Leaked MMS!</p>
+            <button class="join-button" onclick="window.location='https://t.me/+jK5wSMTnqiE4NTdl';">Join Now</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        const images = [
-            "path/to/your/image1.jpg",
-            "path/to/your/image2.jpg",
-            "path/to/your/image3.jpg"
-            // Add more image paths as needed
-        ];
+        const gallery = document.querySelector('.gallery');
+        const videoModal = document.getElementById('video-modal');
+        const promptModal = document.getElementById('prompt-modal');
+        const videoPlayer = videoModal.querySelector('video');
+        const pageViewsElement = document.getElementById('page-views');
 
-        function getRandomImage() {
-            const randomIndex = Math.floor(Math.random() * images.length);
-            return images[randomIndex];
+        // Handle Page Views
+        let pageViews = localStorage.getItem('pageViews') || 0;
+        const sessionVisited = sessionStorage.getItem('visited');
+
+        if (!sessionVisited) {
+            pageViews++;
+            localStorage.setItem('pageViews', pageViews);
+            sessionStorage.setItem('visited', 'true');
         }
 
+        pageViewsElement.textContent = `Page Views: ${pageViews}`;
+
+        // Fetch video data from JSON file
         fetch('videos.json')
             .then(response => response.json())
             .then(videos => {
-                const gallery = document.getElementById('videoGallery');
                 videos.forEach((video, index) => {
                     const galleryItem = document.createElement('div');
                     galleryItem.className = 'gallery-item';
                     galleryItem.innerHTML = `
                         <div class="thumbnail-container">
-                            <img src="${video.thumbnail}" alt="${video.title}" class="thumbnail" onerror="this.src='https://via.placeholder.com/200';">
+                            <img src="${video.thumbnail}" alt="${video.title}" class="thumbnail">
                         </div>
                         <div class="title-container">
                             <div class="title">${video.title}</div>
-                            <div class="views" id="views${index}">Views: ${video.views}</div>
+                            <div class="views" id="views-${index}">Views: ${video.views}</div>
                         </div>
                     `;
                     galleryItem.addEventListener('click', () => {
-                        const videoPlayer = document.querySelector('#video-modal video');
-                        videoPlayer.src = video.m3u8;
-                        videoPlayer.play();
-
-                        // Show video modal
-                        videoModal.style.display = 'flex';
-
-                        // Pause after 20 seconds and show prompt modal
-                        setTimeout(() => {
-                            videoPlayer.pause();
-                            videoModal.style.display = 'none';
-                            document.getElementById('random-image').src = getRandomImage(); // Set random image
-                            promptModal.style.display = 'flex'; // Show prompt modal
-                        }, 20000); // 20 seconds
-
-                        // Increment and update video views
+                        if (Hls.isSupported()) {
+                            const hls = new Hls();
+                            hls.loadSource(video.m3u8);
+                            hls.attachMedia(videoPlayer);
+                            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                                videoPlayer.play();
+                                setTimeout(() => {
+                                    videoPlayer.pause();
+                                    videoModal.style.display = 'none';
+                                    promptModal.style.display = 'flex';
+                                }, 20000); // Pause after 20 seconds
+                            });
+                        } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                            videoPlayer.src = video.m3u8;
+                            videoPlayer.play();
+                            setTimeout(() => {
+                                videoPlayer.pause();
+                                videoModal.style.display = 'none';
+                                promptModal.style.display = 'flex';
+                            }, 20000); // Pause after 20 seconds
+                        }
                         video.views++;
-                        document.getElementById(`views${index}`).textContent = `Views: ${video.views}`;
+                        document.getElementById(`views-${index}`).textContent = `Views: ${video.views}`;
+                        videoModal.style.display = 'flex';
                     });
                     gallery.appendChild(galleryItem);
                 });
             })
-            .catch(error => console.error('Error loading videos:', error));
-
-        document.getElementById('close-button').addEventListener('click', () => {
-            const videoPlayer = document.querySelector('#video-modal video');
-            videoPlayer.pause();
-            videoPlayer.src = ''; // Clear the video source
-            videoModal.style.display = 'none'; // Hide video modal
-        });
+            .catch(error => console.error('Error fetching video data:', error));
     </script>
 </body>
 </html>
