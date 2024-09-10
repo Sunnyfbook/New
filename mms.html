@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📽️ MMS Collection 🎥</title>
+    <title>Video Gallery</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -41,16 +41,9 @@
             font-size: 2.5rem;
         }
 
-        .page-views {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            color: var(--text-color);
-        }
-
         .gallery {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, 1fr); /* Ensures two videos per row */
             grid-gap: 20px;
         }
 
@@ -91,12 +84,6 @@
             font-weight: 600;
         }
 
-        .views {
-            text-align: center;
-            font-size: 1rem;
-            color: var(--text-color);
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -117,6 +104,14 @@
             width: 80%;
             max-width: 400px;
             text-align: center;
+            position: relative;
+        }
+
+        .modal-content img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 20px;
         }
 
         .join-button {
@@ -141,7 +136,6 @@
 <body>
     <div class="container">
         <h1>Video Gallery</h1>
-        <div class="page-views" id="page-views">Page Views: 0</div>
         <div class="gallery">
             <!-- Gallery items will be dynamically inserted here -->
         </div>
@@ -153,9 +147,10 @@
 
     <div class="modal" id="prompt-modal">
         <div class="modal-content">
-            <h2>Watch Full Video OnTelegram Channel!</h2>
-            <p>Daily Updated MMS,Viral MMS, Trending MMS, Leaked MMS!</p>
-            <button class="join-button" onclick="window.location='https://t.me/+jK5wSMTnqiE4NTdl';">Join Now</button>
+            <img src="https://example.com/your-image.jpg" alt="Join Us"> <!-- Replace with your image URL -->
+            <h2>Join Our Telegram Channel!</h2>
+            <p>For more exciting content, click the button below to join now!</p>
+            <button class="join-button" onclick="window.location='https://t.me/your-telegram-channel';">Join Now</button>
         </div>
     </div>
 
@@ -165,25 +160,12 @@
         const videoModal = document.getElementById('video-modal');
         const promptModal = document.getElementById('prompt-modal');
         const videoPlayer = videoModal.querySelector('video');
-        const pageViewsElement = document.getElementById('page-views');
-
-        // Handle Page Views
-        let pageViews = localStorage.getItem('pageViews') || 0;
-        const sessionVisited = sessionStorage.getItem('visited');
-
-        if (!sessionVisited) {
-            pageViews++;
-            localStorage.setItem('pageViews', pageViews);
-            sessionStorage.setItem('visited', 'true');
-        }
-
-        pageViewsElement.textContent = `Page Views: ${pageViews}`;
 
         // Fetch video data from JSON file
         fetch('videos.json')
             .then(response => response.json())
             .then(videos => {
-                videos.forEach((video, index) => {
+                videos.forEach(video => {
                     const galleryItem = document.createElement('div');
                     galleryItem.className = 'gallery-item';
                     galleryItem.innerHTML = `
@@ -192,7 +174,6 @@
                         </div>
                         <div class="title-container">
                             <div class="title">${video.title}</div>
-                            <div class="views" id="views-${index}">Views: ${video.views}</div>
                         </div>
                     `;
                     galleryItem.addEventListener('click', () => {
@@ -217,8 +198,6 @@
                                 promptModal.style.display = 'flex';
                             }, 20000); // Pause after 20 seconds
                         }
-                        video.views++;
-                        document.getElementById(`views-${index}`).textContent = `Views: ${video.views}`;
                         videoModal.style.display = 'flex';
                     });
                     gallery.appendChild(galleryItem);
