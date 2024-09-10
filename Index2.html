@@ -3,100 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>馃摻锔� MMS Collection 馃帴</title>
+    <title>Video Gallery</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #2980b9;
-            --background-color: #f5f6fa;
-            --text-color: #34495e;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Montserrat', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: #f5f6fa;
+            margin: 0;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            font-size: 2.5rem;
-        }
-
-        .page-views {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            color: var(--text-color);
-        }
-
         .gallery {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-gap: 20px;
-        }
-
-        .gallery-item {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            overflow: hidden;
-        }
-
-        .gallery-item:hover {
-            transform: scale(1.05);
-        }
-
-        .thumbnail-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             width: 100%;
-            height: 200px;
+            max-width: 960px;
+        }
+        .video-item {
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
             overflow: hidden;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
+            width: calc(50% - 20px);
         }
-
-        .thumbnail {
+        .video-item img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
         }
-
-        .title-container {
+        .video-details {
             padding: 10px;
             text-align: center;
         }
-
-        .title {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
         .views {
-            text-align: center;
-            font-size: 1rem;
-            color: var(--text-color);
+            font-size: 0.9rem;
+            color: #666;
         }
-
+        #pageViews {
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -107,124 +55,94 @@
             background-color: rgba(0, 0, 0, 0.8);
             justify-content: center;
             align-items: center;
-            z-index: 1000;
         }
-
         .modal-content {
             background: white;
-            border-radius: 10px;
             padding: 20px;
-            width: 80%;
-            max-width: 400px;
-            text-align: center;
+            border-radius: 8px;
+            position: relative;
+            width: 90%;
+            max-width: 600px;
         }
-
-        .join-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1.2rem;
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             cursor: pointer;
+            font-size: 1.4rem;
+            background: none;
+            border: none;
+            color: #333;
         }
-
-        .join-button:hover {
-            background: var(--secondary-color);
-        }
-
         video {
             width: 100%;
-            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Video Gallery</h1>
-        <div class="page-views" id="page-views">Page Views: 0</div>
-        <div class="gallery">
-            <!-- Gallery items will be dynamically inserted here -->
-        </div>
-    </div>
+    <h1>Video Gallery</h1>
+    <div class="gallery" id="videoGallery"></div>
+    <div id="pageViews"></div>
 
-    <div class="modal" id="video-modal">
-        <video controls></video>
-    </div>
-
-    <div class="modal" id="prompt-modal">
+    <div class="modal" id="videoModal">
         <div class="modal-content">
-            <h2>Watch Full Video OnTelegram Channel!</h2>
-            <p>Daily Updated MMS,Viral MMS, Trending MMS, Leaked MMS!</p>
-            <button class="join-button" onclick="window.location='https://t.me/+jK5wSMTnqiE4NTdl';">Join Now</button>
+            <button class="close" onclick="closeModal()">×</button>
+            <video controls></video>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        const gallery = document.querySelector('.gallery');
-        const videoModal = document.getElementById('video-modal');
-        const promptModal = document.getElementById('prompt-modal');
-        const videoPlayer = videoModal.querySelector('video');
-        const pageViewsElement = document.getElementById('page-views');
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePageViews();
+            fetch('videos.json')
+                .then(response => response.json())
+                .then(videos => displayVideos(videos))
+                .catch(error => console.error('Failed to load videos:', error));
+        });
 
-        // Handle Page Views
-        let pageViews = localStorage.getItem('pageViews') || 0;
-        const sessionVisited = sessionStorage.getItem('visited');
-
-        if (!sessionVisited) {
-            pageViews++;
-            localStorage.setItem('pageViews', pageViews);
-            sessionStorage.setItem('visited', 'true');
+        function displayVideos(videos) {
+            const gallery = document.getElementById('videoGallery');
+            videos.forEach((video, index) => {
+                const videoItem = document.createElement('div');
+                videoItem.className = 'video-item';
+                videoItem.innerHTML = `
+                    <img src="${video.thumbnail}" alt="${video.title}" onclick="playVideo('${video.m3u8}')">
+                    <div class="video-details">
+                        <h3>${video.title}</h3>
+                        <p class="views">Views: ${video.views}</p>
+                    </div>
+                `;
+                gallery.appendChild(videoItem);
+            });
         }
 
-        pageViewsElement.textContent = `Page Views: ${pageViews}`;
+        function playVideo(url) {
+            const videoModal = document.getElementById('videoModal');
+            const videoElement = videoModal.querySelector('video');
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(videoElement);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => videoElement.play());
+            } else {
+                videoElement.src = url; // Directly load the video URL for non-HLS compatible browsers
+            }
+            videoModal.style.display = 'flex';
+        }
 
-        // Fetch video data from JSON file
-        fetch('videos.json')
-            .then(response => response.json())
-            .then(videos => {
-                videos.forEach((video, index) => {
-                    const galleryItem = document.createElement('div');
-                    galleryItem.className = 'gallery-item';
-                    galleryItem.innerHTML = `
-                        <div class="thumbnail-container">
-                            <img src="${video.thumbnail}" alt="${video.title}" class="thumbnail">
-                        </div>
-                        <div class="title-container">
-                            <div class="title">${video.title}</div>
-                            <div class="views" id="views-${index}">Views: ${video.views}</div>
-                        </div>
-                    `;
-                    galleryItem.addEventListener('click', () => {
-                        if (Hls.isSupported()) {
-                            const hls = new Hls();
-                            hls.loadSource(video.m3u8);
-                            hls.attachMedia(videoPlayer);
-                            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                                videoPlayer.play();
-                                setTimeout(() => {
-                                    videoPlayer.pause();
-                                    videoModal.style.display = 'none';
-                                    promptModal.style.display = 'flex';
-                                }, 20000); // Pause after 20 seconds
-                            });
-                        } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                            videoPlayer.src = video.m3u8;
-                            videoPlayer.play();
-                            setTimeout(() => {
-                                videoPlayer.pause();
-                                videoModal.style.display = 'none';
-                                promptModal.style.display = 'flex';
-                            }, 20000); // Pause after 20 seconds
-                        }
-                        video.views++;
-                        document.getElementById(`views-${index}`).textContent = `Views: ${video.views}`;
-                        videoModal.style.display = 'flex';
-                    });
-                    gallery.appendChild(galleryItem);
-                });
-            })
-            .catch(error => console.error('Error fetching video data:', error));
+        function closeModal() {
+            const videoModal = document.getElementById('videoModal');
+            videoModal.style.display = 'none';
+            videoModal.querySelector('video').pause();
+        }
+
+        function updatePageViews() {
+            let pageViews = localStorage.getItem('pageViews') || 0;
+            pageViews++;
+            localStorage.setItem('pageViews', pageViews);
+            document.getElementById('pageViews').textContent = 'Page Views: ' + pageViews;
+        }
     </script>
 </body>
 </html>
