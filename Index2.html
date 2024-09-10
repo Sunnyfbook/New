@@ -84,6 +84,12 @@
             font-weight: 600;
         }
 
+        .views {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -164,7 +170,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         // Array of image URLs for random selection
         const images = [
@@ -188,10 +193,11 @@
                     galleryItem.className = 'gallery-item';
                     galleryItem.innerHTML = `
                         <div class="thumbnail-container">
-                            <img src="${video.thumbnail}" alt="${video.title}" class="thumbnail">
+                            <img src="${video.thumbnail}" alt="${video.title}" class="thumbnail" onerror="this.src='https://via.placeholder.com/200';">
                         </div>
                         <div class="title-container">
                             <div class="title">${video.title}</div>
+                            <div class="views" id="views${index}">Views: ${video.views}</div>
                         </div>
                     `;
                     galleryItem.addEventListener('click', () => {
@@ -209,6 +215,10 @@
                             document.getElementById('random-image').src = getRandomImage(); // Set random image
                             promptModal.style.display = 'flex'; // Show prompt modal
                         }, 20000); // 20 seconds
+
+                        // Increment and update video views
+                        video.views++;
+                        document.getElementById(`views${index}`).textContent = `Views: ${video.views}`;
                     });
                     gallery.appendChild(galleryItem);
                 });
