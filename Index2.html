@@ -23,9 +23,8 @@
             background-color: var(--background-color);
             color: var(--text-color);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            min-height: 100vh;
             padding: 20px;
         }
 
@@ -41,9 +40,15 @@
             font-size: 2.5rem;
         }
 
+        .page-views {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
         .gallery {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* Ensures two videos per row */
+            grid-template-columns: repeat(2, 1fr); /* Two videos per row */
             grid-gap: 20px;
         }
 
@@ -62,7 +67,7 @@
 
         .thumbnail-container {
             width: 100%;
-            height: 200px;
+            height: 200px; /* Fixed height for consistent display */
             overflow: hidden;
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
@@ -82,6 +87,11 @@
         .title {
             font-size: 1.2rem;
             font-weight: 600;
+        }
+
+        .views {
+            font-size: 1rem;
+            color: #888; /* Lighter color for views */
         }
 
         .modal {
@@ -117,14 +127,7 @@
         }
 
         .join-button:hover {
-            background: var(--secondary-color);
-        }
-
-        .random-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%; /* Make the image round */
-            margin-bottom: 20px;
+            background: #27ae60;
         }
 
         video {
@@ -136,7 +139,8 @@
 <body>
     <div class="container">
         <h1>Video Gallery</h1>
-        <div class="gallery">
+        <div class="page-views" id="page-views">Page Views: 0</div>
+        <div class="gallery" id="gallery">
             <!-- Gallery items will be dynamically inserted here -->
         </div>
     </div>
@@ -156,6 +160,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
+        // Initialize page views
+        let pageViews = localStorage.getItem('pageViews') || 0;
+        pageViews++;
+        localStorage.setItem('pageViews', pageViews);
+        document.getElementById('page-views').textContent = `Page Views: ${pageViews}`;
+
         const images = [
             "path/to/your/image1.jpg",
             "path/to/your/image2.jpg",
@@ -171,7 +181,7 @@
         fetch('videos.json')
             .then(response => response.json())
             .then(videos => {
-                const gallery = document.querySelector('.gallery');
+                const gallery = document.getElementById('gallery');
                 videos.forEach((video, index) => {
                     const galleryItem = document.createElement('div');
                     galleryItem.className = 'gallery-item';
@@ -181,6 +191,7 @@
                         </div>
                         <div class="title-container">
                             <div class="title">${video.title}</div>
+                            <div class="views" id="views-${index}">Views: ${video.views || 0}</div>
                         </div>
                     `;
                     galleryItem.addEventListener('click', () => {
@@ -188,6 +199,10 @@
                         videoPlayer.src = video.m3u8;
                         videoPlayer.play();
                         videoModal.style.display = 'flex';
+
+                        // Increment video views
+                        video.views = (video.views || 0) + 1;
+                        document.getElementById(`views-${index}`).textContent = `Views: ${video.views}`;
 
                         // Automatically pause and show prompt after 20 seconds
                         setTimeout(() => {
@@ -201,13 +216,6 @@
                 });
             })
             .catch(error => console.error('Error loading videos:', error));
-
-        // Close the prompt modal (if needed)
-        document.getElementById('prompt-modal').addEventListener('click', function (event) {
-            if (event.target === this) {
-                this.style.display = 'none';
-            }
-        });
     </script>
 </body>
 </html>
